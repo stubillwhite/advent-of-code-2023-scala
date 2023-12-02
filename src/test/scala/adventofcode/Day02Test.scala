@@ -22,4 +22,14 @@ class Day02Test extends AnyFlatSpec {
   it should "return example result given problem input" in {
     solutionPartOne(problemInput) should be(2716)
   }
+
+  behavior of "solutionPartTwo"
+
+  it should "return example result given example input" in {
+    solutionPartTwo(exampleInput) should be(2286)
+  }
+
+  it should "return example result given problem input" in {
+    solutionPartTwo(problemInput) should be(72227)
+  }
 }

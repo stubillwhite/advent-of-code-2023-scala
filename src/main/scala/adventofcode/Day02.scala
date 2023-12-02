@@ -5,6 +5,17 @@ import adventofcode.Utils.loadResourceAsString
 
 object Day02 {
 
+  private case class Game(number: Int, handfuls: Seq[Handful])
+
+  private type Handful = Map[Color, Int]
+
+  object Color extends Enumeration {
+    type Color = Value
+    val Red, Blue, Green = Value
+
+    def fromString(s: String): Color = values.find(_.toString.toLowerCase.equals(s.toLowerCase)).get
+  }
+
   val problemInput: String =
     loadResourceAsString("day-02-input.txt")
 
@@ -15,20 +26,19 @@ object Day02 {
       .sum
   }
 
-  def main(args: Array[String]): Unit = {
-    println(s"Part one: ${solutionPartOne(problemInput)}")
-    println("Done")
+  // Part two
+
+  def solutionPartTwo(input: String): Int = {
+    parseInput(input)
+      .map(minimumCubes)
+      .map(powerset)
+      .sum
   }
 
-  private case class Game(number: Int, handfulls: Seq[Handfull])
-
-  private type Handfull = Map[Color, Int]
-
-  object Color extends Enumeration {
-    type Color = Value
-    val Red, Blue, Green = Value
-
-    def fromString(s: String): Color = values.find(_.toString.toLowerCase.equals(s.toLowerCase)).get
+  def main(args: Array[String]): Unit = {
+    println(s"Part one: ${solutionPartOne(problemInput)}")
+    println(s"Part two: ${solutionPartTwo(problemInput)}")
+    println("Done")
   }
 
   private def parseInput(input: String): Seq[Game] = {
@@ -36,8 +46,8 @@ object Day02 {
   }
 
   private def parseGame(s: String): Game = {
-    val Array(gameStr, handfullsStr) = s.split(": ")
-    Game(parseGameNumber(gameStr), parseHandfulls(handfullsStr))
+    val Array(gameStr, handfulsStr) = s.split(": ")
+    Game(parseGameNumber(gameStr), parseHandfuls(handfulsStr))
   }
 
   private def parseGameNumber(s: String): Int = {
@@ -45,8 +55,8 @@ object Day02 {
     pattern.findFirstMatchIn(s).get.group(1).toInt
   }
 
-  private def parseHandfulls(handfullsStr: String): Seq[Handfull] = {
-    val parseHandfull = (s: String) => {
+  private def parseHandfuls(handfulsStr: String): Seq[Handful] = {
+    val parseHandful = (s: String) => {
       val pattern = raw"(\d+) (\w+)".r
 
       pattern
@@ -55,16 +65,35 @@ object Day02 {
         .toMap
     }
 
-    handfullsStr.split("; ").map(parseHandfull)
+    handfulsStr.split("; ").map(parseHandful)
   }
 
   private def isPossibleGame(game: Game): Boolean = {
-    val isPossibleHandfull = (handfull: Handfull) => {
-      handfull.getOrElse(Red, 0) <= 12 &&
-        handfull.getOrElse(Green, 0) <= 13 &&
-        handfull.getOrElse(Blue, 0) <= 14
+    val isPossibleHandful = (handful: Handful) => {
+      handful.getOrElse(Red, 0) <= 12 &&
+        handful.getOrElse(Green, 0) <= 13 &&
+        handful.getOrElse(Blue, 0) <= 14
     }
 
-    game.handfulls.forall(isPossibleHandfull)
+    game.handfuls.forall(isPossibleHandful)
+  }
+
+  private def mergeWith[K, V](f: (V, V) => V, a: Map[K, V], b: Map[K, V]): Map[K, V] = {
+    (a.keySet ++ b.keySet).map { k =>
+      val v = (a.get(k), b.get(k)) match {
+        case (Some(aVal), None) => aVal
+        case (None, Some(bVal)) => bVal
+        case (Some(aVal), Some(bVal)) => f(aVal, bVal)
+      }
+      k -> v
+    }.toMap
+  }
+
+  private def minimumCubes(game: Game): Handful = {
+    game.handfuls.reduce((a, b) => mergeWith(Integer.max, a, b))
+  }
+
+  private def powerset(handful: Handful): Int = {
+    handful.values.product
   }
 }
