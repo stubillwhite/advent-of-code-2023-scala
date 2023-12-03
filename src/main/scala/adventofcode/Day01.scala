@@ -43,6 +43,9 @@ object Day01 {
       val words = Seq("one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
       val numeralsAndWords = numerals ++ words
 
+      val toNumeral = (s: String) =>
+        if (words.contains(s)) (words.indexOf(s) + 1).toString else s
+
       val numeralsAndWordsPattern = numeralsAndWords.mkString("|")
       val pattern = s"(?=($numeralsAndWordsPattern))".r
       val matches = for (m <- pattern.findAllMatchIn(s)) yield m
@@ -51,14 +54,7 @@ object Day01 {
         .toList
         .sortBy(_.start)
         .map(_.group(1))
-        .map(s => {
-          if (words.contains(s)) {
-            (words.indexOf(s) + 1).toString
-          }
-          else {
-            s
-          }
-        })
+        .map(toNumeral)
     }
 
   private def parseInput(input: String): Seq[String] = {
