@@ -33,7 +33,7 @@ object Day06 {
   // d = (t - x) * x
   // 0 = -x^2 + tx -d
   //
-  // (-b ± sqrc(b^2 - 4ac)) / 2a
+  // (-b ± sqrt(b^2 - 4ac)) / 2a
   // a = -1, b = race-time, c = -dist
 
   private def parseInput(str: String): Seq[Race] = {
